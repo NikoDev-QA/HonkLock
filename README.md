@@ -26,4 +26,4 @@ Este proyecto fue desarrollado utilizando arquitectura limpia y tecnologías mod
 HonkLock solicita permisos sensibles (Accesibilidad, Superposición de pantalla, Modificar Audio). Al ser Open Source, garantizamos que no existen "cajas negras", envíos de datos a servidores de terceros, ni anuncios. Tu privacidad no sale de tu teléfono.
 
 ---
-*Desarrollado con ❤️ por Niko | Open Source Project*
+*Desarrollado con ❤️ por Nicole D.J. | Open Source Project*
