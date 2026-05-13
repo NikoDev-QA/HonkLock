@@ -203,7 +203,7 @@ fun PantallaPrincipal(estadoAccesibilidad: State<Boolean>) {
             color = Color(0xFF2196F3),
             fontWeight = FontWeight.Bold,
             modifier = Modifier.clickable {
-                manejadorEnlaces.openUri("https://github.com/tu_usuario/antirrobo")
+                manejadorEnlaces.openUri("https://github.com/NikoDev-QA/HonkLock")
             }
         )
 
