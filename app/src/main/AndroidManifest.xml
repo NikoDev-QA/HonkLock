@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- ========================================== -->
+    <!-- 🛡️ PERMISOS NECESARIOS PARA EL ANTIRROBO 🛡️ -->
+    <!-- ========================================== -->
+
+    <!-- 1. Permiso para mantener el servicio corriendo en segundo plano -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <!-- Requisito para Android 14+ para especificar qué tipo de servicio es -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+
+    <!-- 2. Permiso para arrancar la app automáticamente cuando se enciende el celular -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <!-- 3. Permiso vital: Para dibujar nuestro menú de apagado falso por encima de otras apps o de la pantalla de bloqueo -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
+    <!-- 4. Permiso para que el celular vibre a lo loco cuando suene la alarma -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <!-- 5. Permisos para leer el estado del teléfono (detectar si sacan el Chip/SIM) -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
+    <!-- Permiso para encender la pantalla cuando detecte el robo -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <!-- Permiso VITAL para poder forzar el volumen al máximo sin que el celular nos ignore -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+
+    <!-- ========================================== -->
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Antirrobo"
+        tools:targetApi="31">
+
+        <!-- Nuestra pantalla principal -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Antirrobo">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Registro de nuestra pantalla VIP de Alerta -->
+        <activity
+            android:name=".PantallaAlertaActivity"
+            android:exported="false"
+            android:launchMode="singleInstance"
+            android:showOnLockScreen="true" />
+
+        <!-- Declaración del servicio en segundo plano (El cerebro de la app) -->
+        <service
+            android:name=".servicios.ServicioAntirrobo"
+            android:foregroundServiceType="specialUse"
+            android:exported="false" />
+
+        <!-- Declaración del servicio de Accesibilidad (Para el menú falso) -->
+        <service
+            android:name=".servicios.ServicioAccesibilidadFalso"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <!-- ✨ ¡AGREGA ESTAS TRES LÍNEAS AQUÍ! ✨ -->
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/accesibilidad_config" />
+
+        </service>
+
+        <!-- Declaración de los detectores (Para que Android nos avise) -->
+        <receiver
+            android:name=".detectores.DetectorArranque"
+            android:exported="true">
+            <intent-filter>
+                <!-- Escucha cuando el teléfono termina de prenderse -->
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+    </application>
+
+</manifest>
