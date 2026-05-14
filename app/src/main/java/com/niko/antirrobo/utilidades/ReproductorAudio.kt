@@ -36,20 +36,22 @@ class ReproductorAudio(private val contexto: Context) {
     }
 
     fun iniciarGrito() {
+        // ✨ CANDADO ANTI-AMNESIA: Evita que un doble-clic rápido sobreescriba tu volumen original
+        if (EstadoAlarma.estaSonando) return
         if (reproductor?.isPlaying == true) return
 
         try {
-            EstadoAlarma.estaSonando = true
+            // Guardamos la foto del volumen exacto que tenías
             volumenOriginalAlarma = gestorAudio.getStreamVolume(AudioManager.STREAM_ALARM)
+            EstadoAlarma.estaSonando = true
 
             val filtroVolumen = IntentFilter("android.media.VOLUME_CHANGED_ACTION")
             contexto.registerReceiver(vigiaVolumen, filtroVolumen)
 
             forzarVolumenAlarma()
 
-            // 4. ✨ EL ARREGLO: Construimos el reproductor PIEZA POR PIEZA ✨
+            // Construimos el reproductor PIEZA POR PIEZA (Tu código que sí funciona)
             reproductor = MediaPlayer().apply {
-                // PRIMERO: Le decimos estrictamente que es una ALARMA DE RELOJ
                 setAudioAttributes(
                     AudioAttributes.Builder()
                         .setUsage(AudioAttributes.USAGE_ALARM)
@@ -57,16 +59,13 @@ class ReproductorAudio(private val contexto: Context) {
                         .build()
                 )
 
-                // SEGUNDO: Buscamos tu archivo mp3
                 val archivoSonido = contexto.resources.openRawResourceFd(R.raw.alarma)
                 setDataSource(archivoSonido.fileDescriptor, archivoSonido.startOffset, archivoSonido.length)
                 archivoSonido.close()
 
-                // TERCERO: Forzamos volumen interno
                 setVolume(1.0f, 1.0f)
                 isLooping = true
 
-                // CUARTO: Lo preparamos y lo arrancamos
                 prepare()
                 start()
             }
@@ -79,6 +78,7 @@ class ReproductorAudio(private val contexto: Context) {
             }
 
         } catch (e: Exception) {
+            EstadoAlarma.estaSonando = false
             e.printStackTrace()
         }
     }
@@ -100,6 +100,15 @@ class ReproductorAudio(private val contexto: Context) {
         }
         reproductor = null
 
-        gestorAudio.setStreamVolume(AudioManager.STREAM_ALARM, volumenOriginalAlarma, 0)
+        // ✨ EL SEGURO DE DESPERTADOR ✨
+        // Si el volumen que tenías guardado era 0 (te iba a dejar sin alarma), lo forzamos al 70%
+        val volumenSeguro = if (volumenOriginalAlarma <= 0) {
+            val maxAlarm = gestorAudio.getStreamMaxVolume(AudioManager.STREAM_ALARM)
+            (maxAlarm * 0.7).toInt()
+        } else {
+            volumenOriginalAlarma
+        }
+
+        gestorAudio.setStreamVolume(AudioManager.STREAM_ALARM, volumenSeguro, 0)
     }
 }
